@@ -1,9 +1,13 @@
-import 'dotenv/config';
-import { onDatabaseConnect } from './config/knex';
+import "dotenv/config";
+import { onDatabaseConnect } from "./config/knex";
 
-onDatabaseConnect()
-    .then(() => console.log('database is connected'))
-    .catch((e) => {
-        console.log('error with connection');
+const main = async () => {
+    try {
+        await onDatabaseConnect();
+        console.log("Database is connected");
+    } catch (e) {
         console.log(e);
-    });
+    }
+};
+
+main();
