@@ -6,7 +6,7 @@ const main = async () => {
         await onDatabaseConnect();
         console.log("Database is connected");
         const users = await knex("users");
-        console.log(users);
+        console.log(users[0].password);
     } catch (e) {
         console.log(e);
     }
