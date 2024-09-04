@@ -2,6 +2,7 @@ import { hashPassword, comparePassword } from "../config/encryption";
 import knex from "../config/knex";
 import { validateRegister, validateLogin } from "./validations";
 import httpError from "http-errors";
+import { generateToken } from "../config/jwt";
 
 const getUser = async (username: string) => {
     knex("users").whereRaw("LOWER(username) = LOWER(?)", [username]).first();
@@ -37,5 +38,14 @@ export const login = async (body: { username: string; password: string }) => {
     if (!passwordMatch) {
         throw new httpError.Unauthorized("Username or password are incorrect");
     }
-    return user;
+    const token = await generateToken({ id: user.id });
+    return {
+        user: {
+            id: user.id,
+            username: user.username,
+            created_at: user.created_at,
+            updated_at: user.updated_at
+        },
+        token
+    };
 };
