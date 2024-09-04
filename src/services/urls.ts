@@ -1,6 +1,7 @@
 import knex from "../config/knex";
 import httpError from "http-errors";
 import { validateCreateShortURL, validateUpdateShortURL } from "./validations";
+import { registerVisit } from "./vists";
 export const createShortURL = async (
     body: { url: string; id?: string },
     user_id: number
@@ -28,6 +29,7 @@ export const resolveURL = async (id: string) => {
     if (!url) {
         throw new httpError.NotFound("URL not found");
     }
+    await registerVisit(id, ip);
     return url.url;
 };
 
@@ -73,7 +75,16 @@ export const getURLS = async (
 ) => {
     const results = await knex("urls")
         .where({ user_id })
+        .leftJoin("visits", "urls.id", "visits.url_id")
+        .select([
+            "urls.id",
+            "urls.url",
+            "urls.created_at",
+            knex.raw("count(visits.id) as visits_count")
+        ])
         .limit(limit || 15)
-        .offset(offset || 0);
+        .offset(offset || 0)
+        .groupBy("urls.id")
+        .orderBy("urls.created_at", "desc");
     return results;
 };
